@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "ARM-ADFS-VNET", "ARM-ADFS-Test\ARM-ADFS-VNET.deployproj", "{5C87C215-1C3D-4328-BA5B-EFE2A5359CC6}"
+EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "ARM-ADFS-Storage", "ARM-ADFS-Storage\ARM-ADFS-Storage.deployproj", "{91DA9812-C57E-494D-AC9A-16AD163C59FC}"
+EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "ARM-ADFS-Servers", "ARM-ADFS-Servers\ARM-ADFS-Servers.deployproj", "{174CB302-4870-433C-B008-4F44F8DC8E63}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5C87C215-1C3D-4328-BA5B-EFE2A5359CC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C87C215-1C3D-4328-BA5B-EFE2A5359CC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C87C215-1C3D-4328-BA5B-EFE2A5359CC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C87C215-1C3D-4328-BA5B-EFE2A5359CC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91DA9812-C57E-494D-AC9A-16AD163C59FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91DA9812-C57E-494D-AC9A-16AD163C59FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91DA9812-C57E-494D-AC9A-16AD163C59FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91DA9812-C57E-494D-AC9A-16AD163C59FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{174CB302-4870-433C-B008-4F44F8DC8E63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{174CB302-4870-433C-B008-4F44F8DC8E63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{174CB302-4870-433C-B008-4F44F8DC8E63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{174CB302-4870-433C-B008-4F44F8DC8E63}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

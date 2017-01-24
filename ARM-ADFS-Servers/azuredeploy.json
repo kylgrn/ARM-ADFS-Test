@@ -1,0 +1,232 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+     "ServerNamePrefix": {
+      "type": "string",
+      "defaultValue": "Dept",
+      "minLength": 1,
+      "maxLength": 6
+    },
+    "ServerDC1name": {
+      "type": "string",
+      "defaultValue": "DC1",
+      "minLength": 1,
+      "metadata": {
+        "descriptoin": "Server name for Domain Controller 1 of 2"
+      }
+    },
+    "ServerDC2name": {
+      "type": "string",
+      "defaultValue": "DC2",
+      "minLength": 1,
+      "metadata": {
+        "descriptoin": "Server name for Domain Controller 2 of 2"
+      }
+    },
+    "ServerAdminUsername": {
+      "type": "string",
+      "defaultvalue": "AzureAdmin",
+      "minLength": 1
+    },
+    "ServerAdminPassword": {
+      "type": "securestring"
+    },
+    "ServerWindowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-Datacenter",
+        "2012-R2-Datacenter",
+        "Windows-Server-Technical-Preview"
+      ]
+    }
+  },
+  "variables": {
+    "ServerDC1FQDN": "[concat(parameters('ServerNamePrefix'),parameters('ServerDC1name'))]",
+    "serverDC1NicName": "[concat(variables('ServerDC1FQDN'), 'NetworkInterface')]",
+    "serverDC1OSDiskName": "[concat(variables('ServerDC1FQDN'),'OSDisk')]",
+    "ServerDC2FQDN": "[concat(parameters('ServerNamePrefix'),parameters('ServerDC2name'))]",
+    "serverDC2NicName": "[concat(variables('ServerDC2FQDN'), 'NetworkInterface')]",
+    "serverDC2OSDiskName": "[concat(variables('ServerDC2FQDN'),'OSDisk')]",
+    "serverImagePublisher": "MicrosoftWindowsServer",
+    "serverImageOffer": "WindowsServer",
+    "serverDCVmSize": "Standard_A2",
+    "serverDCVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetname'))]",
+    "serverDCSubnetRef": "[concat(variables('serverDCVnetID'), '/subnets/', parameters('servicessubnet9name'))]",
+    "serverStorageAccountContainerName": "vhds"
+  },
+  "resources": [
+    {
+      "name": "[variables('serverDC1NicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetname'))]"
+      ],
+      "tags": {
+        "displayName": "DC1Nic",
+        "Workloads": "Identity"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('serverDCSubnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('ServerDC1FQDN')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('servicesidentitystorageName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('serverDC1NicName'))]"
+      ],
+      "tags": {
+        "displayName": "DC1",
+        "Workloads": "Identity"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('serverDCVmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('ServerDC1FQDN')]",
+          "adminUsername": "[parameters('ServerAdminUsername')]",
+          "adminPassword": "[parameters('ServerAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('serverImagePublisher')]",
+            "offer": "[variables('serverImageOffer')]",
+            "sku": "[parameters('ServerWindowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[concat(variables('serverDC1OSDiskName'))]",
+            "vhd": {
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('servicesidentitystorageName')), '2016-01-01').primaryEndpoints.blob, variables('serverStorageAccountContainerName'), '/', variables('serverDC1OSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "datadisks": [
+            {
+              "name": "datadisk1",
+              "disksizeGB": "500",
+              "lun": 1,
+              "vhd": {
+                "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('servicesidentitystorageName')), '2016-01-01').primaryEndpoints.blob, variables('serverStorageAccountContainerName'), '/', variables('serverdc1fqdn'), '-datadisk1', '.vhd')]"
+              },
+              "createoption": "empty"
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('serverDC1NicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "[variables('serverDC2NicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetname'))]"
+      ],
+      "tags": {
+        "displayName": "DC2Nic",
+        "Workloads": "Identity"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('serverDCSubnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('ServerDC2FQDN')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('servicesidentitystorageName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('serverDC2NicName'))]"
+      ],
+      "tags": {
+        "displayName": "DC2",
+        "Workloads": "Identity"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('serverDCVmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('ServerDC2FQDN')]",
+          "adminUsername": "[parameters('ServerAdminUsername')]",
+          "adminPassword": "[parameters('ServerAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('serverImagePublisher')]",
+            "offer": "[variables('serverImageOffer')]",
+            "sku": "[parameters('ServerWindowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[concat(variables('serverDC2OSDiskName'))]",
+            "vhd": {
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('servicesidentitystorageName')), '2016-01-01').primaryEndpoints.blob, variables('serverStorageAccountContainerName'), '/', variables('serverDC2OSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "datadisks": [
+            {
+              "name": "datadisk1",
+              "disksizeGB": "500",
+              "lun": 1,
+              "vhd": {
+                "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('servicesidentitystorageName')), '2016-01-01').primaryEndpoints.blob, variables('serverStorageAccountContainerName'), '/', variables('serverdc2fqdn'), '-datadisk1', '.vhd')]"
+              },
+              "createoption": "empty"
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('serverDC2NicName'))]"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}

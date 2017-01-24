@@ -1,0 +1,557 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resourceprefix-network": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 8,
+      "defaultValue": "services",
+      "metadata": {
+        "Description": "Prefix that will prepend various network resources"
+      }
+    },
+    "vnetlocation": {
+      "type": "string",
+      "defaultValue": "Iowa",
+      "metadata": {
+        "description": "Used to prepend the vnet name"
+      }
+    },
+    "vnetaddressprefix": {
+      "type": "string",
+      "defaultvalue": "10.0.0.0/21",
+      "metadata": {
+        "description": "CIDR prefix for the VNet address space"
+      }
+    },
+    "servicessubnet1name": {
+      "type": "string",
+      "defaultValue": "Private_DMZ_In",
+      "metadata": {
+        "description": "Used to facilitate DMZ network traffic with firewall"
+      }
+    },
+    "servicessubnet1prefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/27",
+      "metadata": {
+        "description": "CIDR prefix for the Private_DMZ_In subnet"
+      }
+    },
+    "servicessubnet2name": {
+      "type": "string",
+      "defaultValue": "Private_DMZ_Out",
+      "metadata": {
+        "description": "Used to facilitate DMZ network traffic with firewall"
+      }
+    },
+    "servicessubnet2prefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.32/27",
+      "metadata": {
+        "description": "CIDR prefix for the Private_DMZ_Out subnet"
+      }
+    },
+    "servicessubnet3name": {
+      "type": "string",
+      "defaultValue": "Public_DMZ_In",
+      "metadata": {
+        "description": "Used to facilitate DMZ network traffic with firewall"
+      }
+    },
+    "servicessubnet3prefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.64/27",
+      "metadata": {
+        "description": "CIDR prefix for the Public_DMZ_In subnet"
+      }
+    },
+    "servicessubnet4name": {
+      "type": "string",
+      "defaultValue": "Public_DMZ_Out",
+      "metadata": {
+        "description": "Used to facilitate DMZ network traffic with firewall"
+      }
+    },
+    "servicessubnet4prefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.96/27",
+      "metadata": {
+        "description": "CIDR prefix for the Public_DMZ_Out subnet"
+      }
+    },
+    "servicessubnet5name": {
+      "type": "string",
+      "defaultValue": "Management",
+      "metadata": {
+        "description": "Used to house a jumpbox for user administration"
+      }
+    },
+    "servicessubnet5prefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.128/27",
+      "metadata": {
+        "description": "CIDR prefix for the Management subnet"
+      }
+    },
+    "servicessubnet5nsg": {
+      "type": "string",
+      "defaultValue": "nsg_Management",
+      "metadata": {
+        "description": "NSG: Used for access control lists"
+      }
+    },
+    "servicessubnet6name": {
+      "type": "string",
+      "defaultValue": "Web",
+      "metadata": {
+        "description": "Used for front-end application servers"
+      }
+    },
+    "servicessubnet6prefix": {
+      "type": "string",
+      "defaultValue": "10.0.1.0/24",
+      "metadata": {
+        "description": "CIDR prefix for the Web subnet"
+      }
+    },
+    "servicessubnet6nsg": {
+      "type": "string",
+      "defaultValue": "nsg_Web",
+      "metadata": {
+        "description": "NSG: Used for access control lists"
+      }
+    },
+    "servicessubnet7name": {
+      "type": "string",
+      "defaultValue": "Applications",
+      "metadata": {
+        "description": "Used for application processing"
+      }
+    },
+    "servicessubnet7prefix": {
+      "type": "string",
+      "defaultValue": "10.0.2.0/24",
+      "metadata": {
+        "description": "CIDR prefix for the Applications subnet"
+      }
+    },
+    "servicessubnet7nsg": {
+      "type": "string",
+      "defaultValue": "nsg_Applications",
+      "metadata": {
+        "description": "NSG: Used for access control lists"
+      }
+    },
+    "servicessubnet8name": {
+      "type": "string",
+      "defaultValue": "Data",
+      "metadata": {
+        "description": "Used for data management (e.g. databases)"
+      }
+    },
+    "servicessubnet8prefix": {
+      "type": "string",
+      "defaultValue": "10.0.3.0/24",
+      "metadata": {
+        "description": "CIDR prefix for the Data subnet"
+      }
+    },
+    "servicessubnet8nsg": {
+      "type": "string",
+      "defaultValue": "nsg_Data",
+      "metadata": {
+        "description": "NSG: Used for access control lists"
+      }
+    },
+    "servicessubnet9name": {
+      "type": "string",
+      "defaultValue": "ADDS",
+      "metadata": {
+        "description": "Used to houes Active Directory domain services"
+      }
+    },
+    "servicessubnet9prefix": {
+      "type": "string",
+      "defaultValue": "10.0.4.0/27",
+      "metadata": {
+        "description": "CIDR prefix for the ADFS subnet"
+      }
+    },
+    "servicessubnet9nsg": {
+      "type": "string",
+      "defaultValue": "nsg_ADDS",
+      "metadata": {
+        "description": "NSG: Used for access control lists"
+      }
+    },
+    "servicessubnet10name": {
+      "type": "string",
+      "defaultValue": "ADFS",
+      "metadata": {
+        "description": "Used to house ADFS servers"
+      }
+    },
+    "servicessubnet10prefix": {
+      "type": "string",
+      "defaultValue": "10.0.4.32/27",
+      "metadata": {
+        "description": "CIDR prefix for the ADFS subnet"
+      }
+    },
+    "servicessubnet10nsg": {
+      "type": "string",
+      "defaultValue": "nsg_ADFS",
+      "metadata": {
+        "description": "NSG: Used for access control lists"
+      }
+    },
+    "servicessubnet11name": {
+      "type": "string",
+      "defaultValue": "ADFS_Proxy",
+      "metadata": {
+        "description": "Used to houes Web Application Proxy servers for ADFS"
+      }
+    },
+    "servicessubnet11prefix": {
+      "type": "string",
+      "defaultValue": "10.0.4.128/27",
+      "metadata": {
+        "description": "CIDR prefix for the ADFS_Proxy subnet"
+      }
+    },
+    "servicessubnet11nsg": {
+      "type": "string",
+      "defaultValue": "nsg_ADFS_Proxy",
+      "metadata": {
+        "description": "NSG: Used for access control lists"
+      }
+    },
+    "servicessubnet12name": {
+      "type": "string",
+      "defaultValue": "Gateway",
+      "metadata": {
+        "description": "Used for site-to-site connectivity"
+      }
+    },
+    "servicessubnet12prefix": {
+      "type": "string",
+      "defaultValue": "10.0.7.224/27",
+      "metadata": {
+        "description": "CIDR prefix for the Private_DMZ_Out subnet"
+      }
+    }
+  },
+  "variables": {
+    "vnetname": "[concat(parameters('resourceprefix-network'),'_vnet_',parameters('vnetlocation'))]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetname'))]",
+    "servicessubnet1ref": "[concat(variables('vnetID'), '/subnets/', parameters('servicessubnet1name'))]",
+    "servicessubnet2ref": "[concat(variables('vnetID'), '/subnets/', parameters('servicessubnet2name'))]",
+    "servicessubnet3ref": "[concat(variables('vnetID'), '/subnets/', parameters('servicessubnet3name'))]",
+    "servicessubnet4ref": "[concat(variables('vnetID'), '/subnets/', parameters('servicessubnet4name'))]",
+    "servicessubnet5ref": "[concat(variables('vnetID'), '/subnets/', parameters('servicessubnet5name'))]",
+    "servicessubnet6ref": "[concat(variables('vnetID'), '/subnets/', parameters('servicessubnet6name'))]",
+    "servicessubnet7ref": "[concat(variables('vnetID'), '/subnets/', parameters('servicessubnet7name'))]",
+    "servicessubnet8ref": "[concat(variables('vnetID'), '/subnets/', parameters('servicessubnet8name'))]",
+    "servicessubnet9ref": "[concat(variables('vnetID'), '/subnets/', parameters('servicessubnet9name'))]",
+    "servicessubnet10ref": "[concat(variables('vnetID'), '/subnets/', parameters('servicessubnet10name'))]",
+    "servicessubnet11ref": "[concat(variables('vnetID'), '/subnets/', parameters('servicessubnet11name'))]",
+    "servicessubnet12ref": "[concat(variables('vnetID'), '/subnets/', parameters('servicessubnet12name'))]",
+    "nsgidservicessubnet5": "[resourceID('Microsoft.Network/networkSecurityGroups/',parameters('servicessubnet5nsg'))]",
+    "nsgidservicessubnet6": "[resourceID('Microsoft.Network/networkSecurityGroups/',parameters('servicessubnet6nsg'))]",
+    "nsgidservicessubnet7": "[resourceID('Microsoft.Network/networkSecurityGroups/',parameters('servicessubnet7nsg'))]",
+    "nsgidservicessubnet8": "[resourceID('Microsoft.Network/networkSecurityGroups/',parameters('servicessubnet8nsg'))]",
+    "nsgidservicessubnet9": "[resourceID('Microsoft.Network/networkSecurityGroups/',parameters('servicessubnet9nsg'))]",
+    "nsgidservicessubnet10": "[resourceID('Microsoft.Network/networkSecurityGroups/',parameters('servicessubnet10nsg'))]",
+    "nsgidservicessubnet11": "[resourceID('Microsoft.Network/networkSecurityGroups/',parameters('servicessubnet11nsg'))]",
+  
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "name": "[parameters('servicessubnet5nsg')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "RDP-3389",
+            "properties": {
+              "description": "All_Internet.inboud.rdp.allow",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "name": "[parameters('servicessubnet6nsg')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "ADFS_Proxy_deny",
+            "properties": {
+              "description": "All_adfs_proxy.deny",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "[parameters('servicessubnet11prefix')]",
+              "destinationAddressPrefix": "*",
+              "access": "Deny",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "name": "[parameters('servicessubnet7nsg')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "ADFS_Proxy_deny",
+            "properties": {
+              "description": "All_adfs_proxy.deny",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "[parameters('servicessubnet11prefix')]",
+              "destinationAddressPrefix": "*",
+              "access": "Deny",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "name": "[parameters('servicessubnet8nsg')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "ADFS_Proxy_deny",
+            "properties": {
+              "description": "All_adfs_proxy.deny",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "[parameters('servicessubnet11prefix')]",
+              "destinationAddressPrefix": "*",
+              "access": "Deny",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "name": "[parameters('servicessubnet9nsg')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "ADFS_Proxy_deny",
+            "properties": {
+              "description": "All_adfs_proxy.deny",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "[parameters('servicessubnet11prefix')]",
+              "destinationAddressPrefix": "*",
+              "access": "Deny",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "name": "[parameters('servicessubnet10nsg')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "HTTPS_ADFS_Proxy_allow",
+            "properties": {
+              "description": "HTTPS_adfs_proxy.allow",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "443",
+              "sourceAddressPrefix": "[parameters('servicessubnet11prefix')]",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "name": "[parameters('servicessubnet11nsg')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "HTTPS-Allow",
+            "properties": {
+              "description": "All_Internet.inboud.https.allow",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "443",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('vnetname')]",
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[resourceGroup().location]",
+      "dependsON": [
+        "[concat('Microsoft.Network/networksecuritygroups/',parameters('servicessubnet5nsg'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('vnetaddressprefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('servicessubnet1name')]",
+            "properties": {
+              "addressPrefix": "[parameters('servicessubnet1prefix')]"
+            }
+          },
+          {
+            "name": "[parameters('servicessubnet2name')]",
+            "properties": {
+              "addressPrefix": "[parameters('servicessubnet2prefix')]"
+            }
+          },
+          {
+            "name": "[parameters('servicessubnet3name')]",
+            "properties": {
+              "addressPrefix": "[parameters('servicessubnet3prefix')]"
+            }
+          },
+          {
+            "name": "[parameters('servicessubnet4name')]",
+            "properties": {
+              "addressPrefix": "[parameters('servicessubnet4prefix')]"
+            }
+          },
+          {
+            "name": "[parameters('servicessubnet5name')]",
+            "properties": {
+              "addressPrefix": "[parameters('servicessubnet5prefix')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgidservicessubnet5')]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('servicessubnet6name')]",
+            "properties": {
+              "addressPrefix": "[parameters('servicessubnet6prefix')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgidservicessubnet6')]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('servicessubnet7name')]",
+            "properties": {
+              "addressPrefix": "[parameters('servicessubnet7prefix')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgidservicessubnet7')]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('servicessubnet8name')]",
+            "properties": {
+              "addressPrefix": "[parameters('servicessubnet8prefix')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgidservicessubnet8')]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('servicessubnet9name')]",
+            "properties": {
+              "addressPrefix": "[parameters('servicessubnet9prefix')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgidservicessubnet9')]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('servicessubnet10name')]",
+            "properties": {
+              "addressPrefix": "[parameters('servicessubnet10prefix')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgidservicessubnet10')]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('servicessubnet11name')]",
+            "properties": {
+              "addressPrefix": "[parameters('servicessubnet11prefix')]",
+              "networkSecurityGroup": {
+                "id": "[variables('nsgidservicessubnet11')]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('servicessubnet12name')]",
+            "properties": {
+              "addressPrefix": "[parameters('servicessubnet12prefix')]"
+            }
+          }
+
+        ]
+      }
+
+    }
+  ],
+  "outputs": {}
+}
+
+
+

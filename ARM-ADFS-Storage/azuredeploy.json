@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "servicesidentitystorageType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_GRS",
+        "Standard_LRS"
+      ]
+    }
+  },
+  "variables": {
+    "servicesidentitystorageName": "[concat('identity', uniqueString(resourceGroup().id))]"
+  },
+  "resources": [
+    {
+      "name": "[variables('servicesidentitystorageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "servicesidentitystorage"
+      },
+      "properties": {
+        "accountType": "[parameters('servicesidentitystorageType')]",
+        "Description": "Storage account ot houes the identity components for ADFS"
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
